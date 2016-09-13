@@ -4,12 +4,10 @@ from selenium.webdriver.common.by import By
 
 
 class OrganizationListPage(Page):
-    def __init__(self, test):
-        super().__init__(test)
-        self.url = self.base_url + '/organizations/'
+    path = '/organizations/'
 
     def go_to(self):
-        self.browser.get(self.url)
+        super().go_to()
         self.test.wait_for(self.get_org_list_title)
         return self
 

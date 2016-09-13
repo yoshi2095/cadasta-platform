@@ -6,23 +6,7 @@ from django_countries import countries
 
 
 class ProjectListPage(Page):
-
     path = '/projects/'
-
-    def __init__(self, test):
-        super().__init__(test)
-        self.url = self.base_url + self.path
-
-    def is_on_page(self):
-        """Returns True if user is on this page"""
-        return self.test.get_url_path() == self.path
-
-    def go_to(self):
-        self.browser.get(self.url)
-
-    def go_to_and_check_on_page(self):
-        self.browser.get(self.url)
-        assert self.is_on_page()
 
     def is_list_empty(self):
         cell = self.browser.find_element_by_xpath(
@@ -116,3 +100,7 @@ class ProjectListPage(Page):
     def click_archive_filter(self, option):
         option = self.get_archive_option(option)
         self.test.click_through(option, (By.CLASS_NAME, 'sorting_asc'))
+
+    def follow_add_project_link(self):
+        link = self.BY_CSS('.page-title a.btn-primary')
+        link.click()
