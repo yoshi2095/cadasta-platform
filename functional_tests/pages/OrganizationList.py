@@ -23,15 +23,16 @@ class OrganizationListPage(Page):
         table_head = self.test.table('DataTables_Table_0')
         return table_head.find_element_by_xpath("//thead//tr//th" + xpath)
 
-    def get_table_data(self, xpath, row):
-        return self.test.table_body(
-            "DataTables_Table_0", "//tr{}//td".format(row) + xpath)
-
-    def get_organization_title_in_table(self, row="[1]"):
-        return self.get_table_data("//h4", row).text
-
-    def get_new_organization_title_in_table(self):
-        return self.get_organization_title_in_table("[3]")
+    def get_organization_title_in_table(self, slug=None):
+        if slug:
+            return self.test.table_body(
+                "DataTables_Table_0",
+                "//tr//td//h4//a[contains(@href, '{slug}')]".format(
+                    slug=slug)).text
+        else:
+            return self.test.table_body(
+                "DataTables_Table_0",
+                "//tr[1]//td//h4").text
 
     def sort_table_by(self, order, col):
         order = "asc" if order == "ascending" else "desc"
@@ -43,54 +44,41 @@ class OrganizationListPage(Page):
         organization_title = self.get_organization_title_in_table()
         return organization_title
 
-    def get_search_box(self):
+    def click_search_box(self):
         return self.test.search_box("DataTables_Table_0")
 
-    def get_archive_filter(self, xpath):
-        return self.browser.find_element_by_xpath(
-            "//select[contains(@id, 'archive-filter')]" + xpath)
-
-    def get_archive_option(self, option):
-        return self.get_archive_filter(
-            "//option[contains(@value, '{}')]".format(option))
-
     def click_archive_filter(self, option):
-        option = self.get_archive_option(option)
+        option = self.test.archive_filter(
+            "//option[contains(@value, '{}')]".format(option))
         self.click_through(option, (By.CLASS_NAME, 'sorting_asc'))
 
     def click_add_button(self):
         add_button = self.test.link("add-org")
         self.click_through(add_button, (By.CLASS_NAME, 'modal-content'))
 
-    def get_modal_form(self, xpath):
+    def get_add_organization_form(self, xpath):
         return self.browser.find_element_by_xpath(
             "//form[@action='/organizations/new/']//" + xpath)
 
     def get_name_input(self):
-        return self.get_modal_form("input[@name='name']")
+        return self.get_add_organization_form("input[@name='name']")
 
     def get_description_input(self):
-        return self.get_modal_form("textarea[@name='description']")
+        return self.get_add_organization_form("textarea[@name='description']")
 
     def get_urls_input(self):
-        return self.get_modal_form("input[@name='urls']")
+        return self.get_add_organization_form("input[@name='urls']")
 
     def get_submit(self):
-        return self.get_modal_form("button[@name='submit']")
+        return self.get_add_organization_form("button[@name='submit']")
 
     def get_fields(self):
         return {
             'name':        self.get_name_input(),
             'description': self.get_description_input(),
             'urls':        self.get_urls_input(),
-            'add':         self.get_submit()
+            'submit':         self.get_submit()
         }
-
-    def click_submit_button(self):
-        fields = self.get_fields()
-        self.click_through(
-            fields['add'], OrganizationPage.BY_ORG_OVERVIEW
-        )
 
     def click_close_button(self, button):
         cancel = self.test.link(button)
@@ -123,8 +111,8 @@ class OrganizationListPage(Page):
         sel = BY_ORG_DASHBOARD if err is None else self.test.BY_FIELD_ERROR
         self.test.click_through(fields['add'], sel, screenshot='tst')
 
-        fields = self.get_fields()
         if err is not None:
+            fields = self.get_fields()
             for f in err:
                 try:
                     self.test.assert_field_has_error(fields[f], message)
@@ -133,6 +121,7 @@ class OrganizationListPage(Page):
                         'Field "' + f + '" should have error, but does not'
                     )
         if ok is not None:
+            fields = self.get_fields()
             for f in ok:
                 try:
                     self.test.assert_field_has_no_error(fields[f])

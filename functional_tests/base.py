@@ -61,6 +61,10 @@ class FunctionalTest(StaticLiveServerTestCase):
         return self.browser.find_element_by_xpath(
             "//div[@id='page-content']" + field)
 
+    def page_title(self, xpath=''):
+        return self.browser.find_element_by_xpath(
+            "//div[contains(@class, 'page-title')]//h1" + xpath)
+
     def form(self, f):
         """Find a form of a given class."""
         return self.browser.find_element_by_xpath(
@@ -86,6 +90,11 @@ class FunctionalTest(StaticLiveServerTestCase):
         return self.browser.find_element_by_xpath(
             "//div[contains(@id, '{}_filter')]//input".format(f))
 
+    def archive_filter(self, xpath=''):
+        """Find the archive filter connected to table"""
+        return self.browser.find_element_by_xpath(
+            "//select[contains(@id, 'archive-filter')]" + xpath)
+
     def link(self, f):
         """Find a link with a specific class"""
         return self.browser.find_element_by_xpath(
@@ -100,15 +109,6 @@ class FunctionalTest(StaticLiveServerTestCase):
         """Find a button with a specific class"""
         return self.browser.find_element_by_xpath(
             "//button[contains(@class, '{}')]".format(f))
-
-    def h1(self, f):
-        """Find a header given a specific class"""
-        return self.browser.find_element_by_xpath(
-         "//h1[contains(@class, '{}')]".format(f))
-
-    def page_title(self, xpath=''):
-        return self.page_header("//div[contains(@class, 'page-title')]//h1" +
-                                xpath)
 
     def wait_for(self, function_with_assertion, timeout=DEFAULT_WAIT):
         """Wait for an assertion to become true."""

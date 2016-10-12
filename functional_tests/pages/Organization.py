@@ -181,8 +181,7 @@ class OrganizationPage(Page):
         new_proj = self.get_page_content(
             "//a[contains(@href, '/projects/new/')]")
         self.click_through(new_proj, (By.CLASS_NAME, 'new-project-page'))
-        title = self.test.h1("new-project-page").text
-        return title
+        return self.test.page_title().text
 
     def go_back_to_organization_list(self):
         back_button = self.test.link('index-link')

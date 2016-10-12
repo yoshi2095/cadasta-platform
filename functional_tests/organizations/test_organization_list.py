@@ -26,8 +26,8 @@ class OrganizationListTest(FunctionalTest):
         page = OrganizationListPage(self)
         page.go_to()
 
-        organization_title = page.get_organization_title_in_table()
-        assert organization_title == 'Organization #0'
+        org_title = page.get_organization_title_in_table()
+        assert org_title == 'Organization #0'
 
     def test_organizations_view_with_permission(self):
         """A registered user can view organizations"""
@@ -36,8 +36,8 @@ class OrganizationListTest(FunctionalTest):
         page = OrganizationListPage(self)
         page.go_to()
 
-        organization_title = page.get_organization_title_in_table()
-        assert organization_title == 'Organization #0'
+        org_title = page.get_organization_title_in_table()
+        assert org_title == 'Organization #0'
 
     def test_sorting_organization_view(self):
         """A registered user user can sort the organization list
@@ -66,7 +66,7 @@ class OrganizationListTest(FunctionalTest):
         page = OrganizationListPage(self)
         page.go_to()
 
-        search = page.get_search_box()
+        search = page.click_search_box()
         search.send_keys("#1")
 
         organization_title = page.get_organization_title_in_table()
@@ -96,7 +96,7 @@ class OrganizationListTest(FunctionalTest):
         fields = page.get_fields()
         fields['urls'].clear()
 
-        page.click_submit_button()
+        page.try_submit()
         organization_name = self.page_title().text
         assert organization_name == 'Organization #2'.upper()
         self.logout()
@@ -105,7 +105,8 @@ class OrganizationListTest(FunctionalTest):
         page = OrganizationListPage(self)
         page.go_to()
 
-        organization_table = page.get_new_organization_title_in_table()
+        organization_table = page.get_organization_title_in_table(
+            slug='organization-2')
         assert "Organization #2" in organization_table
 
     def test_archived_orgs_appear_for_admin_user(self):
@@ -143,6 +144,7 @@ class OrganizationListTest(FunctionalTest):
         """If the organization list spans two pages, and an archived
         organization appears on the second page, the archive filter option
         should still appear"""
+
         OrganizationFactory.create_batch(10)
 
         LoginPage(self).login('testadmin', 'password')
