@@ -104,28 +104,11 @@ class OrganizationListPage(Page):
             self.check_inputboxes
         )
 
-    def try_submit(self, err=None, ok=None, message=None):
-        BY_ORG_DASHBOARD = (By.CLASS_NAME, 'organization-dashboard')
+    def try_submit(self, err=None, ok=None,):
+        get_fields = self.get_fields
+        if err:
+            by = (By.CLASS_NAME, 'modal-backdrop')
+        else:
+            by = (By.CLASS_NAME, 'content-single')
 
-        fields = self.get_fields()
-        sel = BY_ORG_DASHBOARD if err is None else self.test.BY_FIELD_ERROR
-        self.test.click_through(fields['add'], sel, screenshot='tst')
-
-        if err is not None:
-            fields = self.get_fields()
-            for f in err:
-                try:
-                    self.test.assert_field_has_error(fields[f], message)
-                except:
-                    raise AssertionError(
-                        'Field "' + f + '" should have error, but does not'
-                    )
-        if ok is not None:
-            fields = self.get_fields()
-            for f in ok:
-                try:
-                    self.test.assert_field_has_no_error(fields[f])
-                except:
-                    raise AssertionError(
-                        'Field "' + f + '" should not have error, but does'
-                    )
+        self.test.try_submit(get_fields, by, err, ok)

@@ -9,7 +9,9 @@ def get_test_data():
         {'username': 'testuser', 'password': 'password',
          'email': 'testuser@example.com', 'full_name': 'Test User'},
         {'username': 'testadmin', 'password': 'password',
-         'email': 'testadmin@example.com', 'full_name': 'Test Admin'}
+         'email': 'testadmin@example.com', 'full_name': 'Test Admin'},
+        {'username': 'testanonymous', 'password': 'password',
+         'email': 'testanonymous@example.com', 'full_name': 'Test Anonymous'},
     ]
     test_data['users'] = users
     test_data['superuser'] = users[0]
@@ -17,7 +19,7 @@ def get_test_data():
     # Define 2 orgs and their members
     test_data['orgs'] = [
         {'name': "Organization #0", 'description': "This is a test.",
-         '_members': (1, 2)},
+         '_members': (1, 2,), '_admins': (2,)},
         {'name': "Organization #1", 'description': "This is a test.",
          '_members': (1,), '_admins': (1,)},
         {'name': "Zealous Archived Organization",
@@ -60,7 +62,7 @@ def get_test_data():
                        '-4.6746826171875000 7.8252894725496338, '
                        '-4.8641967773437491 8.2278005261522775, '
                        '-5.1031494140625000 8.1299292850467957))')
-        }
+        },
     ]
 
     return test_data

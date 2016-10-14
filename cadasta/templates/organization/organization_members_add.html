@@ -30,7 +30,7 @@
           </div>
           <div class="modal-footer">
             <button type="submit" class="btn btn-primary pull-right">{% trans "Save" %}</button>
-            <a class="btn btn-link" href="{% url 'organization:members' organization.slug %}">{% trans "Cancel" %}</a>
+            <a class="btn btn-link cancel" href="{% url 'organization:members' organization.slug %}">{% trans "Cancel" %}</a>
           </div>
         </form>
       </div>

@@ -15,14 +15,10 @@ class OrganizationListTest(FunctionalTest):
         super().setUp()
         PolicyFactory.load_policies()
         load_test_data(get_test_data())
-        UserFactory.create(
-            username='wyldstyle',
-            password='password')
 
     def test_organizations_view_without_permission(self):
         """ Unregistered users can see organizations."""
-        # again, not sure why you have to call this explicitly
-        assign_user_policies(None, Policy.objects.get(name='default'))
+
         page = OrganizationListPage(self)
         page.go_to()
 
@@ -87,7 +83,7 @@ class OrganizationListTest(FunctionalTest):
         page.try_submit(err=['name'], ok=['description', 'urls'])
 
         fields = page.get_fields()
-        fields['name'].send_keys('Organization #2')
+        fields['name'].send_keys('New Organization')
         fields['description'].send_keys('This is a test organization')
         fields['urls'].send_keys('invalid url')
         page.try_submit(err=['urls'], ok=['name', 'description'],
@@ -98,16 +94,16 @@ class OrganizationListTest(FunctionalTest):
 
         page.try_submit()
         organization_name = self.page_title().text
-        assert organization_name == 'Organization #2'.upper()
+        assert organization_name == 'New Organization'.upper()
         self.logout()
 
-        LoginPage(self).login('wyldstyle', 'password')
+        LoginPage(self).login('testanonymous', 'password')
         page = OrganizationListPage(self)
         page.go_to()
 
         organization_table = page.get_organization_title_in_table(
-            slug='organization-2')
-        assert "Organization #2" in organization_table
+            slug='new-organization')
+        assert "New Organization" in organization_table
 
     def test_archived_orgs_appear_for_admin_user(self):
         """The option to filter active/archived organizations is available to

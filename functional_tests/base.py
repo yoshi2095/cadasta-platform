@@ -63,7 +63,10 @@ class FunctionalTest(StaticLiveServerTestCase):
 
     def page_title(self, xpath=''):
         return self.browser.find_element_by_xpath(
-            "//div[contains(@class, 'page-title')]//h1" + xpath)
+                "//div[contains(@class, 'page-title')]//h1" + xpath)
+
+    def panel_title(self):
+        return self.page_content("//h2").text
 
     def form(self, f):
         """Find a form of a given class."""
@@ -240,7 +243,7 @@ class FunctionalTest(StaticLiveServerTestCase):
         """
         Check to make sure that the close and cancel buttons work on modals.
         """
-        close_buttons = ['btn-link', 'close']
+        close_buttons = ['cancel', 'close']
         for close in close_buttons:
             if fill_inputbox:
                 fill_inputbox()
@@ -257,7 +260,7 @@ class FunctionalTest(StaticLiveServerTestCase):
     def try_cancel_and_close_confirm_modal(self,
                                            click_on_button,
                                            check_input=None):
-        close_buttons = ['btn-link', 'close']
+        close_buttons = ['cancel', 'close']
         for close in close_buttons:
             click_on_button()
             cancel = self.button_class(close)
@@ -266,6 +269,32 @@ class FunctionalTest(StaticLiveServerTestCase):
 
             if check_input:
                 check_input()
+
+    def try_submit(self, get_fields, by, err=None, ok=None,):
+        fields = get_fields()
+
+        self.click_through(fields['submit'], by)
+
+        if err is not None:
+            fields = get_fields()
+            for f in err:
+                try:
+                    return self.assert_has_error_list().text
+                except:
+                    self.get_screenshot('submit_error')
+                    raise AssertionError(
+                        'Field "' + f + '" should have error, but does not'
+                    )
+        if ok is not None:
+            fields = get_fields()
+            for f in ok:
+                try:
+                    self.assert_field_has_no_error(fields[f])
+                except:
+                    self.get_screenshot('submit_error')
+                    raise AssertionError(
+                        'Field "' + f + '" should not have error, but does'
+                    )
 
     def get_screenshot(self, title=None):
         if title is not None:

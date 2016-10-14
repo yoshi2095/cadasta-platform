@@ -16,85 +16,74 @@ class OrganizationMemberListTest(FunctionalTest):
         super().setUp()
         PolicyFactory.load_policies()
         test_objs = load_test_data(get_test_data())
-        OrganizationRole.objects.create(
-                organization=test_objs['organizations'][0],
-                user=UserFactory.create(
-                        username='admin_user',
-                        password='password'),
-                admin=True)
-        UserFactory.create(
-            username='hansolo',
-            email='millenniumfalcon@example.com',
-            full_name="Han Solo",
-            password='password')
+
+        self.org = test_objs['organizations'][0]
+        self.archived_org = test_objs['organizations'][2]
 
     def test_registered_user_view(self):
         """A registered admin user can view the member list."""
 
-        LoginPage(self).login('admin_user', 'password')
-        page = OrganizationMemberListPage(self)
+        LoginPage(self).login('testadmin', 'password')
+        page = OrganizationMemberListPage(self, self.org.slug)
         page.go_to()
-        OrganizationPage(self).go_to_organization_page()
 
-        title = page.go_to_member_list_page()
+        title = self.panel_title()
         assert title == "Members".upper()
 
     def test_adding_members(self):
         """A registered admin user can add members to an organization."""
 
-        LoginPage(self).login('admin_user', 'password')
-        page = OrganizationMemberListPage(self)
+        LoginPage(self).login('testadmin', 'password')
+        page = OrganizationMemberListPage(self, self.org.slug)
         page.go_to()
-        OrganizationPage(self).go_to_organization_page()
-        page.go_to_member_list_page()
 
         page.click_on_add_button()
         page.try_cancel_and_close()
 
         fields = page.get_fields()
-        page.try_submit(err=['member'])
+
+        error_message = page.try_submit(err=['username'])
+        assert error_message == 'This field is required.'
 
         fields = page.get_fields()
-        fields['member'].send_keys("darthvader")
-        page.try_submit(
-            err=['member'],
-            message='User with username or email darthvader does not exist')
+        fields['username'].send_keys("darthvader")
+        error_message = page.try_submit(err=['username'])
+        assert error_message == ('User with username or email'
+                                 ' darthvader does not exist')
 
         fields = page.get_fields()
-        fields['member'].clear()
-        fields['member'].send_keys("admin_user")
-        page.try_submit(
-            err=['member'],
-            message='User is already a member of the organization.')
+        fields['username'].clear()
+        fields['username'].send_keys("testuser")
+        error_message = page.try_submit(err=['username'])
+        assert error_message == 'User is already a member of the organization.'
 
         fields = page.get_fields()
-        fields['member'].clear()
-        fields['member'].send_keys("hansolo")
+        fields['username'].clear()
+        fields['username'].send_keys("testanonymous")
         page.try_submit()
+        member = self.panel_title()
+        assert member == "MEMBER: Test Anonymous"
 
-        member = page.get_member_name()
-        assert member == "MEMBER: Han Solo"
-
-        OrganizationMemberPage(self).click_remove_member_and_confirm_buttons()
+        member_page = OrganizationMemberPage(self, self.org.slug,
+                                             'testanonymous')
+        member_page.click_remove_member_and_confirm_buttons()
 
         page.click_on_add_button()
-
         fields = page.get_fields()
-        fields['member'].clear()
-        fields['member'].send_keys("millenniumfalcon@example.com")
+        fields['username'].clear()
+        fields['username'].send_keys("testanonymous@example.com")
         page.try_submit()
-
-        member = page.get_member_name()
-        assert member == "MEMBER: Han Solo"
+        member = self.panel_title()
+        assert member == "MEMBER: Test Anonymous"
 
     def test_adding_members_to_archived_organization(self):
-        LoginPage(self).login('admin_user', 'password')
-        page = OrganizationMemberListPage(self)
-        page.go_to()
-        OrganizationPage(self).go_to_organization_page()
-        OrganizationPage(self).get_archive_button()
-        OrganizationPage(self).click_on_archive_and_confirm()
+        """If an organization is archive, you cannot add members."""
 
-        title = page.go_to_member_list_page()
+        LoginPage(self).login('testadmin', 'password')
+        page = OrganizationMemberListPage(self, self.archived_org.slug)
+        page.go_to()
+        self.get_screenshot()
+
+        title = self.panel_title()
         assert title == "Members".upper()
-        page.click_on_add_button(success=False)
+        page.click_on_add_button(err=True)

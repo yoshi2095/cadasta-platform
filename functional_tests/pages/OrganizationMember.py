@@ -3,54 +3,23 @@ from selenium.webdriver.common.by import By
 
 
 class OrganizationMemberPage(Page):
-    path = '/organizations/'
-
-    BY_ORG_MEMBERS = (By.CLASS_NAME, 'page-title')
-
-    def go_to(self):
-        super().go_to()
-        self.test.wait_for(self.get_org_list_title)
-        return self
-
-    def get_org_list_title(self):
-        title = self.test.page_title()
-        assert title.text == "Organizations".upper()
-        return title
+    def __init__(self, test, org_slug, member):
+        self.path = '/organizations/{org}/members/{member}'.format(
+            org=org_slug,
+            member=member)
+        super().__init__(test)
 
     def click_through(self, button, wait):
         return self.test.click_through(button, wait)
 
-    def get_table_row(self, xpath=""):
-        return self.test.table_body('DataTables_Table_0', "//tr" + xpath)
-
-    def get_member_title(self):
-        return self.test.page_content("//h2").text
-
-    def go_to_testuser_member_page(self, success=True):
-        testuser_page = self.get_table_row(
-            "[contains(@onclick, '/testuser/')]"
-        )
-        if success:
-            self.click_through(testuser_page, (By.CLASS_NAME, 'page-title'))
-            testuser_title = self.get_member_title()
-            return testuser_title
-        else:
-            self.click_through(testuser_page, (By.CLASS_NAME, 'alert-warning'))
-
-    def go_to_admin_member_page(self):
-        testuser_page = self.get_table_row(
-            "[contains(@onclick, '/admin_user/')]"
-        )
-        self.click_through(testuser_page, (By.CLASS_NAME, 'page-title'))
-        testuser_title = self.get_member_title()
-        return testuser_title
-
-    def get_form_field(self, xpath):
-        return self.test.form_field(
-                'org-member-edit', xpath)
+    def get_member_list(self, xpath=""):
+        return self.test.table('DataTables_Table_0')
 
     def get_displayed_member_info(self):
         return self.get_form_field("div[contains(@class, 'member-info')]")
+
+    def get_form_field(self, xpath):
+        return self.test.form_field('org-member-edit', xpath)
 
     def get_member_role_select(self, xpath):
         return self.get_form_field(
@@ -63,25 +32,64 @@ class OrganizationMemberPage(Page):
     def get_admin_role_option(self):
         return self.get_member_role_select("//option[contains(@value, 'A')]")
 
-    def get_org_role_error(self):
-        return self.get_form_field("div[contains(@class, 'member-role')]" +
-                                   "//ul[contains(@class, 'error-block')]")
-
     def get_selected_role(self):
         return self.get_member_role_select(
             "//option[contains(@selected, 'selected')]")
 
-    def get_role_options(self):
+    def get_project_title_in_table(self, row="[1]"):
+        return self.test.table_body(
+            "projects-permissions", "//tr{}//td//label".format(row)).text
+
+    def get_project_permission(self, xpath):
+        try:
+            return self.test.table_body(
+                "projects-permissions", '//select' + xpath)
+        except:
+            print("No project permissions available.")
+            None
+
+    def get_project_user(self):
+        return self.get_project_permission(
+                "//option[contains(@value, 'PU')]")
+
+    def get_data_collector(self):
+        return self.get_project_permission(
+                "//option[contains(@value, 'DC')]")
+
+    def get_project_manager(self):
+        return self.get_project_permission(
+                "//option[contains(@value, 'PM')]")
+
+    def get_public_user(self):
+        return self.get_project_permission(
+                "//option[contains(@value, 'Pb')]")
+
+    def get_selected_permission(self):
+        return self.get_project_permission(
+                "//option[contains(@selected, 'selected')]")
+
+    def get_submit_button(self):
+        return self.get_form_field("button[contains(@name, 'submit')]")
+
+    def get_fields(self):
         return {
             "member": self.get_member_role_option(),
             "admin": self.get_admin_role_option(),
-            "selected": self.get_selected_role()
+            "role_selected": self.get_selected_role(),
+            'pu':       self.get_project_user(),
+            'dc':       self.get_data_collector(),
+            'pm':       self.get_project_manager(),
+            'pb':       self.get_public_user(),
+            'per_selected': self.get_selected_permission(),
+            "submit": self.get_submit_button(),
         }
 
-    def click_submit_button(self):
-        self.click_through(
-            self.test.button("submit"), self.BY_ORG_MEMBERS
-        )
+    def try_submit(self, err=None, ok=None):
+        if err:
+            by = (By.ID, 'projects-permissions_wrapper')
+        else:
+            by = (By.ID, 'DataTables_Table_0_wrapper')
+        self.test.try_submit(self.get_fields, by, err, ok)
 
     def click_remove_button(self):
         self.click_through(
@@ -96,45 +104,10 @@ class OrganizationMemberPage(Page):
     def click_remove_member_and_confirm_buttons(self):
         self.click_remove_button()
         self.click_through(
-            self.test.link("confirm"), self.BY_ORG_MEMBERS
+            self.test.link("confirm"), (By.CLASS_NAME, 'page-title')
         )
 
-    def try_cancel_and_close(self):
+    def try_cancel_and_close_remove_member(self):
         self.test.try_cancel_and_close_confirm_modal(
             self.click_remove_button
         )
-
-    def get_table_data(self, xpath, row):
-        return self.test.table_body(
-            "projects-permissions", "//tr{}//td".format(row) + xpath)
-
-    def get_project_title_in_table(self, row="[1]"):
-        return self.get_table_data("//label", row).text
-
-    def get_project_permission(self, xpath):
-        return self.test.table_body("projects-permissions", '//select' + xpath)
-
-    def get_project_user(self):
-        return self.get_project_permission("//option[contains(@value, 'PU')]")
-
-    def get_data_collector(self):
-        return self.get_project_permission("//option[contains(@value, 'DC')]")
-
-    def get_project_manager(self):
-        return self.get_project_permission("//option[contains(@value, 'PM')]")
-
-    def get_public_user(self):
-        return self.get_project_permission("//option[contains(@value, 'Pb')]")
-
-    def get_selected_permission(self):
-        return self.get_project_permission(
-            "//option[contains(@selected, 'selected')]")
-
-    def get_permission_options(self):
-        return {
-            'pu':       self.get_project_user(),
-            'dc':       self.get_data_collector(),
-            'pm':       self.get_project_manager(),
-            'pb':       self.get_public_user(),
-            'selected': self.get_selected_permission()
-        }
