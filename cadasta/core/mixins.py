@@ -1,9 +1,13 @@
+import boto3
 from django.contrib import messages
 from django.shortcuts import redirect
 from django.core.urlresolvers import reverse
+from django.dispatch import receiver
 from django.utils.translation import gettext as _
+from django.db.models.signals import pre_delete
 
 from tutelary import mixins
+from party.queue_name import return_queue_name
 
 
 class PermissionRequiredMixin(mixins.PermissionRequiredMixin):
@@ -59,3 +63,29 @@ def update_permissions(permission, obj=None):
             return False
         return permission
     return set_permissions
+
+
+# this should not be hardcoded.
+sqs = boto3.resource('sqs')
+queue = sqs.get_queue_by_name(QueueName=return_queue_name())
+
+
+@receiver(pre_delete)
+def update_search_index(sender, instance, **kwargs):
+    list_of_models = ('Party', 'TenureRelationship', 'SpatialUnit')
+    # What actually needs to go in the MessageBody?
+    # What should the groupID be?
+    sender = sender.__base__ if sender._deferred else sender
+    project = (instance.project.name if hasattr(instance, 'project')
+               else instance.project_id)
+    if sender.__name__ in list_of_models:
+        print('message sent to queue')
+        queue.send_message(
+            MessageGroupId='searchIndexUpdate',
+            MessageBody='{} needs to be updated.'.format(project),
+        )
+    # Once merged with eugene's search-reindex
+    # PartySerializer().to_representation(party)
+    # Returns:
+    # OrderedDict([('id', 'drxzdy6x7xau44q9y5nttbjs'),
+    # ('name', 'Party #0'), ('type', 'IN'), ('attributes', {})])
