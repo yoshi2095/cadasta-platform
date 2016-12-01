@@ -1,6 +1,7 @@
 from django.contrib import messages
 from django.shortcuts import redirect
 from django.core.urlresolvers import reverse
+from django.dispatch import receiver
 from django.utils.translation import gettext as _
 from django.db import models
 
