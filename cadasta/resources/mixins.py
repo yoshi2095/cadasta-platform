@@ -36,4 +36,3 @@ def detach_object_resources(sender, instance, **kwargs):
             content_object = resource.content_objects.get(
                 object_id=instance.id,
                 resource__project__slug=instance.project.slug)
-            content_object.delete()
