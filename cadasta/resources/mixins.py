@@ -3,6 +3,8 @@ from django.apps import apps
 from django.dispatch import receiver
 from django.db.models.signals import pre_delete
 
+# from party.models import Party
+
 
 class ResourceModelMixin:
     @property
