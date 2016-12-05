@@ -98,6 +98,9 @@ urlpatterns = [
     url(r'^',
         include('resources.urls.default',
                 namespace='resources')),
+    url(r'^',
+        include('search.urls.default',
+                namespace='search')),
 
     url(r'^api/',
         include(api,

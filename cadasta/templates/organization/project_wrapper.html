@@ -103,6 +103,22 @@
 <!-- Sidebar -->
 <div id="sidebar" class="{% block left-nav %}{% endblock %}">
   <ul class="nav nav-sidebar">
+    <li class="search">
+      <a href="#">
+        <span class="icon"></span>
+        <span class="title">{% trans "Search" %}</span>
+      </a>
+    </li><!-- needed to eliminate spacing issue on horizontal menus -->
+    <li class="search-form">
+      <form id="search" action="#" method="post">
+        <div id="label"><label for="search-terms" id="search-label">search</label></div>
+        <div id="input"><input type="text" name="search-terms" id="search-terms" placeholder="Enter search terms..."></div>
+      </form>
+      <a href="{% url 'search:results' object.organization.slug object.slug %}">
+        <span class="icon"></span>
+        <span class="title">{% trans "Search" %}</span>
+      </a>
+    </li><!-- needed to eliminate spacing issue on horizontal menus -->
     <li class="overview">
       <a href="{% url 'organization:project-dashboard' object.organization.slug object.slug %}">
         <span class="icon"></span>
@@ -189,4 +205,16 @@
   </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
 
+{% endblock %}
+{% block extra_script %}
+<script>
+  // $(".search-form").hide()
+  // $(document).ready(function(){
+  //   $(".search li").click(function(){
+  //     $(".search").remove_class("visible")
+  //     $(".search-form").add_class("visible")
+
+  //   })
+  // })
+</script>
 {% endblock %}
