@@ -4,7 +4,6 @@ from datetime import datetime
 import magic
 from buckets.fields import S3FileField
 from core.models import ID_FIELD_LENGTH, RandomIDModel
-from core.mixins import update_search_index
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.contrib.contenttypes.fields import GenericForeignKey
@@ -152,9 +151,6 @@ def archive_file(sender, instance, **kwargs):
     # Detach the resource when it is archived
     if instance.archived:
         ContentObject.objects.filter(resource=instance).delete()
-
-models.signals.pre_delete.connect(update_search_index, sender=Resource)
-models.signals.post_save.connect(update_search_index, sender=Resource)
 
 
 def create_thumbnails(instance, created):

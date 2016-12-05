@@ -1,8 +1,6 @@
 """Party models."""
 
 from core.models import RandomIDModel
-from core.mixins import update_search_index
-# from core import signals
 from django.core.urlresolvers import reverse
 from django.conf import settings
 from django.contrib.gis.db import models
@@ -376,5 +374,3 @@ def load_tenure_relationship_types(force=False):
             TenureRelationshipType.objects.create(
                 id=tr_type[0], label=tr_type[1]
             )
-
-models.signals.post_save.connect(update_search_index, sender=Party)
