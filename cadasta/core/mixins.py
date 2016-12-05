@@ -1,11 +1,8 @@
 from django.contrib import messages
 from django.shortcuts import redirect
 from django.core.urlresolvers import reverse
-from django.dispatch import receiver
 from django.utils.translation import gettext as _
-
 from tutelary import mixins
-from party.queue_name import return_queue_name
 
 
 class PermissionRequiredMixin(mixins.PermissionRequiredMixin):
