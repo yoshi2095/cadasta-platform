@@ -15,7 +15,27 @@
       </div>
       <div class="panel panel-default">
         <div class="panel-body">
-          
+          <div class="form-group col-md-8">
+            <input class="form-control col-md-8"/>
+          </div>
+            <input class="btn btn-primary" type="submit" value="{% trans 'Search' %}"/>
+        </div>
+        <div class="panel-body">
+          <div class="search-results">
+            <h3>{% trans "Showing " %}{{ search_total }}{% trans " results for " %}<strong>{{ search_terms }}</strong></h3>
+            {% for result in search_results %}
+            <h4>{{ result.source.entity_name }}</h4>
+            <h3>{{ result.source.entity_type }}</h3>
+            <ul>
+                {% for field in result.source.required_fields %}
+                <li>{{ field.label }} - {{ field.body }}</li>
+                {% endfor %}
+                {% for field in result.source.additional_fields %}
+                <li>{{ field }}</li>
+                {% endfor %}
+            </ul>
+            {% endfor %}
+          </div>
         </div>
       </div>
     </div>
