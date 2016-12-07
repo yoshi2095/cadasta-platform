@@ -88,13 +88,6 @@ class PartyTest(UserTestCase, TestCase):
         assert not ContentObject.objects.filter(
             object_id=party.id, resource=resource).exists()
 
-    def test_update_search_index(self):
-        pass
-        # party = PartyFactory.create()
-        # party.delete()
-        # # How are we planning on testing these?
-        # assert False
-
 
 class PartyRelationshipTest(UserTestCase, TestCase):
 
