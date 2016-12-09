@@ -12,13 +12,17 @@ from ..reindex import (api,
                        switch_alias,
                        run)
 from core.util import ID_FIELD_LENGTH
+from core.tests.utils.cases import UserTestCase
 from organization.tests.factories import ProjectFactory
 from party.models import Party
 from party.serializers import PartySerializer
 from party.tests.factories import PartyFactory
+from resources.models import Resource
+from resources.serializers import ResourceSerializer
+from resources.tests.factories import ResourceFactory
 
 
-class ReindexTest(TestCase):
+class ReindexTest(UserTestCase, TestCase):
     @patch('requests.put')
     def test_create_new_index(self, mock_put):
         mock_put.return_value.status_code = 200
@@ -62,6 +66,30 @@ class ReindexTest(TestCase):
             mock_call_args.append(call(index_url + '/party/_bulk', data=bulk))
 
         mock_post.assert_has_calls(mock_call_args)
+
+    @patch('requests.post')
+    def test_index_record_type_with_archived_resource(self, mock_post):
+        mock_post.return_value.status_code = 200
+
+        project = ProjectFactory()
+        resource1 = ResourceFactory.create(project=project)
+        ResourceFactory.create(project=project, archived=True)
+
+        index_url = api + '/test_index'
+        index_record_type(
+            project.slug,
+            index_url,
+            'resource',
+            Resource,
+            ResourceSerializer,
+        )
+
+        bulk = '{"create":{"_id":"' + resource1.id + '"}}\n'
+        bulk += JSONRenderer().render(
+            ResourceSerializer(resource1, context={'search': True}).data
+        ).decode() + '\n'
+        mock_post.assert_called_once_with(
+            index_url + '/resource/_bulk', data=bulk)
 
     @patch('requests.post')
     def test_index_record_type_empty(self, mock_post):

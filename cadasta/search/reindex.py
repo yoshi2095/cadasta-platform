@@ -32,6 +32,8 @@ def index_record_type(project_slug, index_url, es_type, model, serializer):
 
     page_size = settings.ES_REINDEX_PAGE_SIZE
     records = model.objects.filter(project__slug=project_slug)
+    if es_type == 'resource':
+        records = records.filter(archived=False)
     if records:
         for i in range(0, len(records), page_size):
             batch_records = records[i:i + page_size]
