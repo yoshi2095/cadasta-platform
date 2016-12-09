@@ -25,8 +25,9 @@ def get_updated_record_data(sender, instance, project, **kwargs):
         entity_type=sender.__name__)
 
     if message_in_queue:
-        message = json.loads(message_in_queue.body)
+        message = message_in_queue.body
         message_in_queue.delete()
+        message = json.loads(message)
 
         message_body = message['body']
         instance_index = {'index': {'_id': instance.id}}
