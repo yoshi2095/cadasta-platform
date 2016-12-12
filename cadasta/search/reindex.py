@@ -37,6 +37,7 @@ def index_record_type(project_slug, index_url, es_type, model, serializer):
     if records:
         for i in range(0, len(records), page_size):
             batch_records = records[i:i + page_size]
+
             bulk = ''
             for record in batch_records:
                 # ES Bulk API action line
@@ -45,6 +46,8 @@ def index_record_type(project_slug, index_url, es_type, model, serializer):
                 bulk += JSONRenderer().render(
                     serializer(record, context={'search': True}).data
                 ).decode() + '\n'
+            bulk = bulk.encode('utf-8')
+
             r = requests.post(
                 index_url + '/' + es_type + '/_bulk', data=bulk)
             assert r.status_code == 200
@@ -54,7 +57,15 @@ def get_old_index(project_slug):
     """This routine queries the ES cluster for the actual index name for the
     specified project and returns the name."""
 
-    r = requests.get(api + '/_alias/' + project_slug)
+    r = requests.get(
+        api + '/_alias/' + project_slug,
+        headers={'cache-control': 'no-cache'},
+    )
+
+    # If 404, assume that there's no alias yet
+    if r.status_code == 404:
+        return None
+
     indices = list(r.json().keys())
     assert len(indices) <= 1
     if len(indices) == 1:

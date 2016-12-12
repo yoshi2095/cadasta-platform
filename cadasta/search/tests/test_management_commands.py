@@ -63,6 +63,7 @@ class ReindexTest(UserTestCase, TestCase):
                 bulk += JSONRenderer().render(
                     PartySerializer(party, context={'search': True}).data
                 ).decode() + '\n'
+            bulk = bulk.encode('utf-8')
             mock_call_args.append(call(index_url + '/party/_bulk', data=bulk))
 
         mock_post.assert_has_calls(mock_call_args)
@@ -88,6 +89,7 @@ class ReindexTest(UserTestCase, TestCase):
         bulk += JSONRenderer().render(
             ResourceSerializer(resource1, context={'search': True}).data
         ).decode() + '\n'
+        bulk = bulk.encode('utf-8')
         mock_post.assert_called_once_with(
             index_url + '/resource/_bulk', data=bulk)
 
@@ -105,33 +107,58 @@ class ReindexTest(UserTestCase, TestCase):
 
     @patch('requests.get')
     def test_get_old_index_existing(self, mock_get):
+        mock_get.return_value.status_code = 200
         mock_get.return_value.json.return_value = {'index': []}
 
         project_slug = 'test_slug'
         old_index = get_old_index(project_slug)
 
         assert old_index == 'index'
-        mock_get.assert_called_once_with(api + '/_alias/' + project_slug)
+        mock_get.assert_called_once_with(
+            api + '/_alias/' + project_slug,
+            headers={'cache-control': 'no-cache'},
+        )
 
     @patch('requests.get')
     def test_get_old_index_does_not_exist(self, mock_get):
+        mock_get.return_value.status_code = 200
         mock_get.return_value.json.return_value = {}
 
         project_slug = 'test_slug'
         old_index = get_old_index(project_slug)
 
         assert old_index is None
-        mock_get.assert_called_once_with(api + '/_alias/' + project_slug)
+        mock_get.assert_called_once_with(
+            api + '/_alias/' + project_slug,
+            headers={'cache-control': 'no-cache'},
+        )
+
+    @patch('requests.get')
+    def test_get_old_index_no_alias_yet(self, mock_get):
+        mock_get.return_value.status_code = 404
+
+        project_slug = 'test_slug'
+        old_index = get_old_index(project_slug)
+
+        assert old_index is None
+        mock_get.assert_called_once_with(
+            api + '/_alias/' + project_slug,
+            headers={'cache-control': 'no-cache'},
+        )
 
     @patch('requests.get')
     def test_get_old_index_invalid(self, mock_get):
+        mock_get.return_value.status_code = 200
         mock_get.return_value.json.return_value = {'index1': [], 'index2': []}
 
         project_slug = 'test_slug'
         with pytest.raises(AssertionError):
             get_old_index(project_slug)
 
-        mock_get.assert_called_once_with(api + '/_alias/' + project_slug)
+        mock_get.assert_called_once_with(
+            api + '/_alias/' + project_slug,
+            headers={'cache-control': 'no-cache'},
+        )
 
     @patch('requests.delete')
     @patch('requests.post')
@@ -192,6 +219,9 @@ class ReindexTest(UserTestCase, TestCase):
             ']}}'
         ).format(project.slug, new_index)
         mock_put.assert_called_once_with(api + '/' + new_index)
-        mock_get.assert_called_once_with(api + '/_alias/' + project.slug)
+        mock_get.assert_called_once_with(
+            api + '/_alias/' + project.slug,
+            headers={'cache-control': 'no-cache'},
+        )
         mock_post.assert_called_once_with(api + '/_aliases/', data=data)
         mock_delete.assert_not_called()
