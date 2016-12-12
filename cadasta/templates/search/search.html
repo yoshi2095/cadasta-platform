@@ -1,0 +1,56 @@
+{% extends "organization/project_wrapper.html" %}
+{% load i18n %}
+
+{% block page_title %}{% trans "Search" %} | {% endblock %}
+{% block left-nav %}search{% endblock %}
+
+{% block content %}
+
+<div class="col-md-12 content-single">
+  <div class="row">
+    <!-- Main text  -->
+    <div class="col-md-12 main-text">
+      <div class="page-title">
+        <h2>{% trans "Search" %}</h2>
+      </div>
+      <div class="panel panel-default">
+        <div class="panel-body">
+          <form action="#" id="search-form" data-search-api-url="{% url 'api:v1:search:search' object.organization.slug object.slug %}">
+            <div class="form-group">
+              <input type="search" id="search-input" class="form-control" value="{{ search_query }}">
+              <button class="btn btn-primary"><span class="glyphicon glyphicon-search" aria-hidden="true"></span> {% trans "Go" %}</button>
+            </div>
+          </form>
+          <h3>{% trans "Search results" %}</h3>
+          <table id="search-results" class="table table-hover datatable" data-paging-type="simple">
+            <thead>
+              <tr>
+                <th class="col-md-2">{% trans "Entity Class" %}</th>
+                <th class="col-md-10">{% trans "Entity Name or Description" %}</th>
+              </tr>
+            </thead>
+            <tbody>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+'use strict';
+
+window.addEventListener('load', function() {
+  $('#search-form').bind('submit', function(e) {
+    var url = e.currentTarget.dataset.searchApiUrl;
+    var query = $('#search-input')[0].value;
+    $.get(url + '?q=' + query, function(response) {
+      var t = $('#search-results').DataTable();
+      t.rows().remove();
+      t.rows.add(response.results).draw();
+    });
+  });
+});
+</script>
+
+{% endblock %}
