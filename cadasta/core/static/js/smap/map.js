@@ -1,11 +1,12 @@
+var map = L.map('mapid');
+
 var SMap = (function() {
-    var map = L.map('mapid');
     var layerscontrol = L.control.layers().addTo(map);
 
     function add_tile_layers() {
       for (var i = 0, n = layers.length; i < n; i++) {
-        var options = L.Util.extend(layers[i]['attrs']);
-        var layer = {name: layers[i]['label'], url: layers[i]['url'], options: options};
+        var options = L.Util.extend(layers[i].attrs);
+        var layer = {name: layers[i].label, url: layers[i].url, options: options};
 
         var l = L.tileLayer(layer.url, layer.options);
         layerscontrol.addBaseLayer(l, layer.name);
@@ -43,7 +44,7 @@ var SMap = (function() {
       }
     }
 
-    load_project_extent()
+    load_project_extent();
 
     function render_features(){
       var geoJson = L.geoJson(null, {
@@ -53,7 +54,7 @@ var SMap = (function() {
             layer.bindPopup("<div class=\"text-wrap\">" +
                           "<h2><span>Location</span>" +
                           feature.properties.type + "</h2></div>" +
-                          "<div class=\"btn-wrap\"><a href='" + feature.properties.url + "' class=\"btn btn-primary btn-sm btn-block\">" + options.trans['open'] + "</a>"  +
+                          "<div class=\"btn-wrap\"><a href='" + feature.properties.url + "' class=\"btn btn-primary btn-sm btn-block\">" + options.trans.open + "</a>"  +
                           "</div>");
           }
         }
@@ -81,11 +82,11 @@ var SMap = (function() {
       load_features(url);
   }
 
-  render_features()
+  render_features();
 
   function render_spatial_resource(){
     $.ajax(fetch_spatial_resources).done(function(data){
-      if (data.length == 0) return;
+      if (data.length === 0) return;
       var spatialResources = {};
       $.each(data, function(idx, resource){
         var name = resource.name;
@@ -93,15 +94,15 @@ var SMap = (function() {
         var group = new L.LayerGroup();
         $.each(resource.spatial_resources, function(i, spatial_resource){
           var layer = L.geoJson(spatial_resource.geom).addTo(group);
-          layers['name'] = spatial_resource.name;
-          layers['group'] = group;
+          layers.name = spatial_resource.name;
+          layers.group = group;
         });
         spatialResources[name] = layers;
       });
       $.each(spatialResources, function(sr){
         var layer = spatialResources[sr];
-        layerscontrol.addOverlay(layer['group'], layer['name'], sr);
-      })
+        layerscontrol.addOverlay(layer.group, layer.name, sr);
+      });
     });
   }
 
@@ -110,18 +111,18 @@ var SMap = (function() {
   function geoLocate() {
     return function(event) {
       map.locate({ setView: true });
-    }
+    };
   }
 
-  $(window).on('hashchange', function() {
-    if (window.location.hash === '#overview')
-      $('.content-single').removeClass('detail-hidden')
-    else {
-        $('.content-single').addClass('detail-hidden')
-    }
+  // $(window).on('hashchange', function() {
+  //   if (window.location.hash === '#overview')
+  //     $('.content-single').removeClass('detail-hidden')
+  //   else {
+  //       $('.content-single').addClass('detail-hidden')
+  //   }
 
-    window.setTimeout(function() {
-      map.invalidateSize();
-    }, 400);
-  })
+  //   window.setTimeout(function() {
+  //     map.invalidateSize();
+  //   }, 400);
+  // })
 })();

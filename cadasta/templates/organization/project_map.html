@@ -54,8 +54,13 @@
     </div>
     <!-- / end overview map -->
     <!-- Overview detail  -->
-    <div class='col-md-4 detail'>
-    <!-- THIS IS WHERE THE NEW SIDE MENU DETAILS GO -->
+    <div class='col-md-4 detail' id='project-detail'>
+      <script type="text/html" id='overview-tab'>
+        {% include "organization/project_dashboard.html" %} 
+      </script>
+      <script type="text/html" id='map-tab'>
+        <h1>I'm not!</h1>
+      </script>
     </div>
   </div>
   <!-- / overview detail -->

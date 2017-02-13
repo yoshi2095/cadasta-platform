@@ -115,14 +115,14 @@
     </li><!-- needed to eliminate spacing issue on horizontal menus
     -->
     <li class="overview">
-      <a href="{% url 'organization:project-dashboard' object.organization.slug object.slug %}#overview">
+      <a href="#/overview">
         <span class="icon"></span>
         <span class="title">{% trans "Overview" %}</span>
       </a>
     </li><!--
     --><li class="map">
       <!-- <a href="{% url 'locations:list' object.organization.slug object.slug %}"> -->
-      <a href="#">
+      <a href="#/map">
         <span class="icon map"></span>
         <span class="title">{% trans "Map" %}</span>
       </a>
