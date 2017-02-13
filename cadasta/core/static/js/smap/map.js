@@ -54,7 +54,8 @@ var SMap = (function() {
             layer.bindPopup("<div class=\"text-wrap\">" +
                           "<h2><span>Location</span>" +
                           feature.properties.type + "</h2></div>" +
-                          "<div class=\"btn-wrap\"><a href='" + feature.properties.url + "' class=\"btn btn-primary btn-sm btn-block\">" + options.trans.open + "</a>"  +
+                          // "<div class=\"btn-wrap\"><a href='" + feature.properties.url + "' class=\"btn btn-primary btn-sm btn-block\">" + options.trans.open + "</a>"  +
+                          "<div class=\"btn-wrap\"><a href='#/location' class=\"btn btn-primary btn-sm btn-block\">" + options.trans.open + "</a>"  +
                           "</div>");
           }
         }

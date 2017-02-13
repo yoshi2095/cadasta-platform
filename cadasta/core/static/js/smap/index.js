@@ -5,5 +5,6 @@ $(window).load(function () {
     body.append($('<script src="/static/js/smap/' + js_files[i] + '"></script>'));
   }
   console.log('call router!');
-  router();
+  var sr = new SimpleRouter();
+  sr.router();
 });

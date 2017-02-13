@@ -17,6 +17,15 @@
 <!-- <script src="{% static 'js/leaflet.markercluster.js' %}"></script> -->
 <!-- <script src="{% static 'js/L.Map.Deflate.js' %}"></script> -->
 <script src="{% static 'js/smap/index.js' %}"></script>
+<script type="text/html" id='overview-tab'>
+  {% include "organization/project_dashboard.html" %} 
+</script>
+<script type="text/html" id='map-tab'>
+  <h1>I'm not!</h1>
+</script>
+<script type="text/html" id='location-tab'>
+  <h1>It's totally a location!</h1>
+</script>
 
 <script>
   var url = '{% url "async:spatial:list" project.organization.slug project.slug %}'
@@ -55,12 +64,6 @@
     <!-- / end overview map -->
     <!-- Overview detail  -->
     <div class='col-md-4 detail' id='project-detail'>
-      <script type="text/html" id='overview-tab'>
-        {% include "organization/project_dashboard.html" %} 
-      </script>
-      <script type="text/html" id='map-tab'>
-        <h1>I'm not!</h1>
-      </script>
     </div>
   </div>
   <!-- / overview detail -->
