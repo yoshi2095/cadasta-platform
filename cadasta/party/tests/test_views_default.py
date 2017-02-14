@@ -628,7 +628,7 @@ class PartyResourcesAddTest(ViewTestCase, UserTestCase, TestCase):
         assign_policies(user)
         response = self.request(method='POST', user=user)
         assert response.status_code == 302
-        assert response.location == self.expected_success_url
+        assert response.location == self.expected_success_url + '#resources'
 
         party_resources = self.party.resources.all()
         assert len(party_resources) == 2
@@ -753,7 +753,7 @@ class PartyResourcesNewTest(ViewTestCase, UserTestCase, FileStorageTestCase,
         assign_policies(user)
         response = self.request(method='POST', user=user)
         assert response.status_code == 302
-        assert response.location == self.expected_success_url
+        assert response.location == self.expected_success_url + '#resources'
 
         assert self.party.resources.count() == 1
 
