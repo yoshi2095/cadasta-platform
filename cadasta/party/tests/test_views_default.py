@@ -262,15 +262,15 @@ class PartyDetailTest(ViewTestCase, UserTestCase, TestCase):
         assert response.content == self.expected_content
 
     def test_get_with_authorized_user_including_relationships(self):
-        rels = TenureRelationshipFactory.create_batch(2,
-                                                      party=self.party,
-                                                      project=self.project)
+        TenureRelationshipFactory.create_batch(2,
+                                               party=self.party,
+                                               project=self.project)
         user = UserFactory.create()
         assign_policies(user)
         response = self.request(user=user)
         assert response.status_code == 200
         assert response.content == self.render_content(
-            relationships=reversed(rels))
+            relationships=self.party.tenurerelationship_set.all())
 
     def test_get_from_non_existend_project(self):
         user = UserFactory.create()
