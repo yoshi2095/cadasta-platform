@@ -52,6 +52,12 @@ class PartiesDetail(LoginPermissionRequiredMixin,
     permission_denied_message = error_messages.PARTY_VIEW
     attributes_field = 'attributes'
 
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
+        context['relationships'] = self.object.tenurerelationship_set.all(
+        ).select_related('spatial_unit').defer('spatial_unit__attributes')
+        return context
+
 
 class PartiesEdit(LoginPermissionRequiredMixin,
                   mixins.PartyObjectMixin,
